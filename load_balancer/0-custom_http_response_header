@@ -1,12 +1,17 @@
 #!/usr/bin/env bash
 # Configures nginx so every response has an X-Served-By header with the server's hostname
-apt-get update -y
-apt-get install -y nginx
+SUDO=""
+if [ "$(id -u)" -ne 0 ]; then
+    SUDO="sudo"
+fi
 
-echo "Holberton School for the win!" > /var/www/html/index.html
-echo "Ceci n'est pas une page" > /var/www/html/404.html
+$SUDO apt-get update -y
+$SUDO apt-get install -y nginx
 
-cat > /etc/nginx/sites-available/default << 'CONF'
+echo "Holberton School for the win!" | $SUDO tee /var/www/html/index.html > /dev/null
+echo "Ceci n'est pas une page" | $SUDO tee /var/www/html/404.html > /dev/null
+
+$SUDO tee /etc/nginx/sites-available/default > /dev/null << 'CONF'
 server {
 	listen 80 default_server;
 	listen [::]:80 default_server;
@@ -34,7 +39,7 @@ server {
 }
 CONF
 
-ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
-rm -f /etc/nginx/conf.d/custom_header.conf
+$SUDO ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+$SUDO rm -f /etc/nginx/conf.d/custom_header.conf
 
-service nginx restart
+$SUDO service nginx restart
