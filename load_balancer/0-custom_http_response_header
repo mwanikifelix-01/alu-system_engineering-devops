@@ -42,4 +42,8 @@ CONF
 $SUDO ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 $SUDO rm -f /etc/nginx/conf.d/custom_header.conf
 
+if ! grep -q "X-Served-By" /etc/nginx/nginx.conf; then
+    $SUDO sed -i "/http {/a \\\\tadd_header X-Served-By \$hostname;" /etc/nginx/nginx.conf
+fi
+
 $SUDO service nginx restart
