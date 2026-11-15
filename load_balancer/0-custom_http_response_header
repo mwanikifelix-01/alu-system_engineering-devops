@@ -2,22 +2,39 @@
 # Configures nginx so every response has an X-Served-By header with the server's hostname
 apt-get update -y
 apt-get install -y nginx
+
 echo "Holberton School for the win!" > /var/www/html/index.html
 echo "Ceci n'est pas une page" > /var/www/html/404.html
 
-config="/etc/nginx/sites-available/default"
-redirect="\tlocation /redirect_me {\n\t\treturn 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;\n\t}"
-if ! grep -q "redirect_me" "$config"; then
-    sed -i "/server_name _;/a \\$redirect" "$config"
-fi
+cat > /etc/nginx/sites-available/default << 'CONF'
+server {
+	listen 80 default_server;
+	listen [::]:80 default_server;
 
-not_found="\terror_page 404 /404.html;\n\tlocation = /404.html {\n\t\troot /var/www/html;\n\t\tinternal;\n\t}"
-if ! grep -q "error_page 404" "$config"; then
-    sed -i "/server_name _;/a \\$not_found" "$config"
-fi
+	root /var/www/html;
+	index index.html index.htm index.nginx-debian.html;
 
-if ! grep -q "X-Served-By" "$config"; then
-    sed -i "/server_name _;/a \\\\tadd_header X-Served-By \$hostname;" "$config"
-fi
+	server_name _;
+
+	add_header X-Served-By $hostname;
+
+	location / {
+		try_files $uri $uri/ =404;
+	}
+
+	location /redirect_me {
+		return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
+	}
+
+	error_page 404 /404.html;
+	location = /404.html {
+		root /var/www/html;
+		internal;
+	}
+}
+CONF
+
+ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+rm -f /etc/nginx/conf.d/custom_header.conf
 
 service nginx restart
