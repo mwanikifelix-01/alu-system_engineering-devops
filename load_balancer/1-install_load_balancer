@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Installs HAproxy and load balances traffic to web-01 and web-02 using roundrobin
-WEB01_IP="WEB01_IP_HERE"
-WEB02_IP="WEB02_IP_HERE"
+WEB01_IP="3.9.17.146"
+WEB02_IP="18.130.224.177"
 
 apt-get update -y
 apt-get install -y haproxy
