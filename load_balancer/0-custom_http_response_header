@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
-# Configures Nginx with a custom HTTP response header X-Served-By containing server hostname
+# Configure Nginx with a custom HTTP header X-Served-By containing the server's hostname
+# shellcheck disable=SC2154
 
+# Update and install Nginx
 apt-get update -y
 apt-get install -y nginx
 
-echo "Holberton School" > /var/www/html/index.html
-echo "Holberton School" > /var/www/html/index.nginx-debian.html
-
-# Insert X-Served-By header right after server_name _;
-if ! grep -q "X-Served-By" /etc/nginx/sites-available/default; then
-    sed -i "/server_name _;/a \    add_header X-Served-By \$HOSTNAME;" /etc/nginx/sites-available/default
+# Insert add_header directive into the default server block if it doesn't already exist
+if ! grep -q "add_header X-Served-By" /etc/nginx/sites-available/default; then
+    sed -i '/server_name _;/a \    add_header X-Served-By $hostname;' /etc/nginx/sites-available/default
 fi
 
+# Test Nginx configuration and restart the service
+nginx -t
 service nginx restart
