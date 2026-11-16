@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Starts Apache so the container returns a page containing "Hello Holberton"
+# Starts the Apache service to serve the default web page
+
 service apache2 start
-service apache2 status
-echo "Hello Holberton" > /var/www/html/index.html
