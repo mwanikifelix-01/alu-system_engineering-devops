@@ -1,5 +1,18 @@
 #!/usr/bin/env bash
-# Starts Apache so the container returns a page containing "Hello Holberton" and outputs apache2 status
-service apache2 start
-echo "Hello Holberton" > /var/www/html/index.html
-service apache2 status
+# Makes sure Apache is installed and running, and that its root returns "Hello Holberton"
+SUDO=""
+if [ "$(id -u)" -ne 0 ]; then
+    SUDO="sudo"
+fi
+
+if ! command -v apache2 > /dev/null 2>&1; then
+    $SUDO apt-get update -y
+    $SUDO apt-get install -y apache2
+fi
+
+if ! grep -q "Hello Holberton" /var/www/html/index.html 2> /dev/null; then
+    echo "Hello Holberton" | $SUDO tee /var/www/html/index.html > /dev/null
+fi
+
+$SUDO service apache2 start
+$SUDO service apache2 status
