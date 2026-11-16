@@ -1,49 +1,10 @@
 #!/usr/bin/env bash
 # Configures nginx so every response has an X-Served-By header with the server's hostname
-SUDO=""
-if [ "$(id -u)" -ne 0 ]; then
-    SUDO="sudo"
-fi
+sudo apt-get update -y
+sudo apt-get install -y nginx
+echo "Holberton School for the win!" | sudo tee /var/www/html/index.html > /dev/null
+echo "Ceci n'est pas une page" | sudo tee /var/www/html/404.html > /dev/null
 
-$SUDO apt-get update -y
-$SUDO apt-get install -y nginx
+sudo sed -i "s|server_name _;|server_name _;\n\n\tadd_header X-Served-By \$hostname;\n\n\tlocation /redirect_me {\n\t\treturn 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;\n\t}\n\n\terror_page 404 /404.html;\n\tlocation = /404.html {\n\t\troot /var/www/html;\n\t\tinternal;\n\t}|" /etc/nginx/sites-available/default
 
-echo "Holberton School for the win!" | $SUDO tee /var/www/html/index.html > /dev/null
-echo "Ceci n'est pas une page" | $SUDO tee /var/www/html/404.html > /dev/null
-
-$SUDO tee /etc/nginx/sites-available/default > /dev/null << 'CONF'
-server {
-	listen 80 default_server;
-	listen [::]:80 default_server;
-
-	root /var/www/html;
-	index index.html index.htm index.nginx-debian.html;
-
-	server_name _;
-
-	add_header X-Served-By $hostname;
-
-	location / {
-		try_files $uri $uri/ =404;
-	}
-
-	location /redirect_me {
-		return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
-	}
-
-	error_page 404 /404.html;
-	location = /404.html {
-		root /var/www/html;
-		internal;
-	}
-}
-CONF
-
-$SUDO ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
-$SUDO rm -f /etc/nginx/conf.d/custom_header.conf
-
-if ! grep -q "X-Served-By" /etc/nginx/nginx.conf; then
-    $SUDO sed -i "/http {/a \\\\tadd_header X-Served-By \$hostname;" /etc/nginx/nginx.conf
-fi
-
-$SUDO service nginx restart
+sudo service nginx restart
